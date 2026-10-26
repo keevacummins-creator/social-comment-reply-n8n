@@ -21,7 +21,7 @@ This n8n workflow reads new comments on your Facebook Page, Instagram and YouTub
    - SMTP, on "Email You" (or replace it with a Gmail or Outlook node), and change the from and to addresses
    - Facebook Graph API with a Page access token, on "Reply on Facebook" and "Reply on Instagram"
    - YouTube OAuth, on "Fetch YouTube Comments" and "Reply on YouTube"
-5. Facebook and Instagram: in your Meta app, add a webhook with this workflow's production URL. Make up a verify token and paste the same one into "Verify Token Matches?" in place of `CHANGE_ME_VERIFY_TOKEN`. Subscribe to `feed` for your Page and `comments` for Instagram.
+5. Facebook and Instagram: in your Meta app, add a webhook with this workflow's production URL. Make up a verify token and paste the same one into "Verify Token Matches?" in place of `CHANGE_ME_VERIFY_TOKEN`. Subscribe to `feed` for your Page and `comments` for Instagram. The app needs the `pages_read_engagement`, `pages_manage_engagement` and `instagram_manage_comments` permissions, and has to be in Live mode to receive comments from people other than you.
 6. YouTube: replace `YOUR_CHANNEL_ID` in "Fetch YouTube Comments". If you don't use YouTube, delete those nodes.
 7. TikTok and LinkedIn (optional): run a comment scraper on a schedule (Apify has several) and POST each new comment to the same webhook URL as JSON:
    ```json
@@ -34,5 +34,7 @@ This n8n workflow reads new comments on your Facebook Page, Instagram and YouTub
 - The webhook URL accepts any POST request, so keep it private. Anyone who has it could send fake comments.
 - Every new comment is one Claude call. On a busy account, check your Anthropic usage for the first week.
 - If Claude's answer can't be read, nothing gets posted and you get a "Check this comment" email instead.
-- YouTube is read 50 comments at a time. If you get more than 50 comments in 15 minutes, some will be missed.
+- YouTube is read 50 comments at a time, and only comments from the last hour are picked up, so turning it on won't reply to your old comments. If the workflow is off for more than an hour, comments from that gap are skipped.
+- Every TikTok or LinkedIn comment that gets a reply sends you an email, because you have to post it yourself. On a busy account that's a lot of email.
+- Facebook only lets through new comments. Likes, edits, deletions and your own posts are ignored.
 - It uses `claude-sonnet-5`. You can switch to a cheaper model in "Claude Writes Reply" if the replies are still good enough.
