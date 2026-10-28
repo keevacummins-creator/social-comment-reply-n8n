@@ -4,12 +4,12 @@ This n8n workflow reads new comments on your Facebook Page, Instagram and YouTub
 
 ## How it works
 
-1. Facebook and Instagram comments arrive through a Meta webhook. YouTube is checked every 15 minutes, since YouTube has no webhook. TikTok and LinkedIn comments can come in too if you send them from a scraper (see setup step 6).
-2. It skips comments it has already handled, and comments from your own accounts, so it never replies to itself.
-3. Claude reads the comment and decides whether it's a lead, a question, praise, a complaint or spam. It writes a one to three sentence reply using the brand details you fill in. It won't make up prices or dates, and it doesn't reply to spam or comments that only tag a friend.
+1. Facebook and Instagram comments arrive through a Meta webhook. YouTube is checked every 15 minutes, since YouTube has no webhook. TikTok and LinkedIn comments can come in too if you send them from a scraper (see setup step 7).
+2. It skips comments it has already handled, and comments from the accounts you list in setup step 3, so it doesn't reply to itself.
+3. Claude reads the comment and decides whether it's a lead, a question, praise, a complaint or spam. It writes a one to three sentence reply using the brand details you fill in. It's told not to make up prices or dates, and to skip spam and comments that only tag a friend.
 4. Every comment is logged to an n8n data table.
 5. On Facebook, Instagram and YouTube the reply is posted for you.
-6. You get an email for leads, complaints, and TikTok/LinkedIn replies. TikTok and LinkedIn don't let normal accounts post comment replies through their APIs, so for those the email has the reply ready to copy and paste.
+6. You get an email for leads, complaints, and TikTok/LinkedIn replies. TikTok and LinkedIn only allow comment replies through their APIs if you have a developer app they've approved (TikTok API for Business for Business accounts, LinkedIn's Community Management API for company pages). This template doesn't set those up, so for TikTok and LinkedIn the email has the reply ready to copy and paste.
 
 ## Setup
 
@@ -21,7 +21,7 @@ This n8n workflow reads new comments on your Facebook Page, Instagram and YouTub
    - SMTP, on "Email You" (or replace it with a Gmail or Outlook node), and change the from and to addresses
    - Facebook Graph API with a Page access token, on "Reply on Facebook" and "Reply on Instagram"
    - YouTube OAuth, on "Fetch YouTube Comments" and "Reply on YouTube"
-5. Facebook and Instagram: in your Meta app, add a webhook with this workflow's production URL. Make up a verify token and paste the same one into "Verify Token Matches?" in place of `CHANGE_ME_VERIFY_TOKEN`. Subscribe to `feed` for your Page and `comments` for Instagram. The app needs the `pages_read_engagement`, `pages_manage_engagement` and `instagram_manage_comments` permissions, and has to be in Live mode to receive comments from people other than you.
+5. Facebook and Instagram: in your Meta app, add a webhook with this workflow's production URL. Make up a verify token and paste the same one into "Verify Token Matches?" in place of `CHANGE_ME_VERIFY_TOKEN`. Subscribe to `feed` for your Page and `comments` for Instagram. Your Instagram account needs to be a Professional account connected to your Facebook Page. The app needs `pages_read_engagement` and `pages_manage_engagement` for Facebook, and `instagram_basic` and `instagram_manage_comments` for Instagram. Until Meta approves those permissions through App Review, the app only sees comments from people who have a role on it, which is enough for testing.
 6. YouTube: replace `YOUR_CHANNEL_ID` in "Fetch YouTube Comments". If you don't use YouTube, delete those nodes.
 7. TikTok and LinkedIn (optional): run a comment scraper on a schedule (Apify has several) and POST each new comment to the same webhook URL as JSON:
    ```json
@@ -36,5 +36,5 @@ This n8n workflow reads new comments on your Facebook Page, Instagram and YouTub
 - If Claude's answer can't be read, nothing gets posted and you get a "Check this comment" email instead.
 - YouTube is read 50 comments at a time, and only comments from the last hour are picked up, so turning it on won't reply to your old comments. If the workflow is off for more than an hour, comments from that gap are skipped.
 - Every TikTok or LinkedIn comment that gets a reply sends you an email, because you have to post it yourself. On a busy account that's a lot of email.
-- Facebook only lets through new comments. Likes, edits, deletions and your own posts are ignored.
+- From Facebook, only new comments are used. Likes, edits, deletions and new posts are ignored.
 - It uses `claude-sonnet-5`. You can switch to a cheaper model in "Claude Writes Reply" if the replies are still good enough.
